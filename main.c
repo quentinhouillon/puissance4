@@ -111,26 +111,27 @@ void play() {
     int player = 0;
     int win = 0;
     int key = 0;
+    draw_board();
 
     while (!(win = game_over())) {
-        draw_board();
         printw("player %i : ", player);
 
         if ((key=get_col()) == -1) {
             win = -1;
+            draw_board();
             break;
         }
         player = add_coin(key, player);
         draw_board();
     }
-
     if (win==-1) {
-        printw("No winner !\n");
+        printw("Game stopped !\n");
+    } else if (win==1) {
+        printw("Game finished, no winner !\n");
     } else {
-        printw("Win %i\n", player);
+        printw("%c win\n", win);
     }
     printw("(Press to end !)\n");
-    refresh();
 }
 
 int main() {
