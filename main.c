@@ -107,8 +107,75 @@ int game_over() {
     return completed;
 }
 
+int minimax(int depth, int isMaximizing) {
+    int score = 1;
+    if (score == CHIP[0]) return -10;
+    if (score == CHIP[1]) return 10;
+    if (score == 1) return 0;
+
+    if (isMaximizing) {
+        int bestScore = -1000;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = CHIP[1];
+                    int score = minimax(depth + 1, 0);
+                    board[i][j] = ' ';
+                    if (score > bestScore) bestScore = score;
+                }
+            }
+        }
+        return bestScore;
+    } else {
+        int bestScore = 1000;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = CHIP[0];
+                    int score = minimax(depth + 1, 1);
+                    board[i][j] = ' ';
+                    if (score < bestScore) bestScore = score;
+                }
+            }
+        }
+        return bestScore;
+    }
+}
+
+int find_best_move(int player) {
+    int bestMove = -1;
+    int bestScore = -1000;
+    int opponent = (player + 1) % PLAYERS;
+
+    // Check if we can block opponent's winning move or find the best move using minimax
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] == ' ') {
+                // Check for blocking opponent's winning move
+                board[i][j] = CHIP[opponent];
+                if (game_over() == CHIP[opponent]) {
+                    board[i][j] = ' ';
+                    return j; // Block this move
+                }
+                board[i][j] = ' ';
+
+                // Use minimax to find the best move
+                board[i][j] = CHIP[player];
+                int moveScore = minimax(0, 0);
+                board[i][j] = ' ';
+                if (moveScore > bestScore) {
+                    bestScore = moveScore;
+                    bestMove = j;
+                }
+            }
+        }
+    }
+    return bestMove;
+}
+
 void play() {
     int player = 0;
+    int nbBot = 1;
     int win = 0;
     int key = 0;
     draw_board();
@@ -116,11 +183,16 @@ void play() {
     while (!(win = game_over())) {
         printw("player %i : ", player);
 
-        if ((key=get_col()) == -1) {
-            win = -1;
-            draw_board();
-            break;
+        if (player >= nbBot) {
+            key = find_best_move(player);
+        } else {
+            if ((key = get_col()) == -1) {
+                win = -1;
+                draw_board();
+                break;
+            }
         }
+
         player = add_coin(key, player);
         draw_board();
     }
