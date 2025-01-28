@@ -199,9 +199,8 @@ void play(void) {
         printw("Player %d: ", player);
         refresh();
 
-        if ((PLAYERS-player)<=NBOT) {
-            key = find_best_move(4); // Depth = 4 for performance
-        } else {
+        if ((PLAYERS-player)<=NBOT) key = find_best_move(4); // Depth = 4 for performance
+        else {
             if ((key = get_col()) == -1) {
                 win = -1;
                 draw_board();
